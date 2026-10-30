@@ -147,8 +147,8 @@ box-shadow:0 0 60px 10px #8b5cf666,0 0 220px 70px #8b5cf62a;animation:moon 8s ea
 
 <!-- ===== Discord login (runs first) ===== -->
 <script>
-const DISCORD_CLIENT_ID="YOUR_CLIENT_ID"; // <-- paste your Discord application's Client ID
-const REDIRECT=location.origin+location.pathname;
+const DISCORD_CLIENT_ID="1565095062499627188";
+const REDIRECT="https://zuro98.github.io/Sopranos/";
 let USER=null;
 try{USER=JSON.parse(localStorage.getItem("jUser")||"null")}catch(e){}
 if(USER&&USER.exp<Date.now())USER=null;
@@ -169,7 +169,7 @@ function showLogin(msg){
   const h=new URLSearchParams(location.hash.slice(1));
   if(h.get("access_token")){
     const ok=h.get("state")===sessionStorage.getItem("oauthState");
-    history.replaceState(null,"",REDIRECT);
+    history.replaceState(null,"",location.pathname);
     if(!ok)return showLogin("Login failed (bad state). Try again.");
     try{
       const r=await fetch("https://discord.com/api/users/@me",{headers:{Authorization:"Bearer "+h.get("access_token")}});
