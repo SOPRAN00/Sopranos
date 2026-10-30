@@ -94,6 +94,18 @@ box-shadow:0 0 60px 10px #8b5cf666,0 0 220px 70px #8b5cf62a;animation:moon 8s ea
 .me{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mu)}
 .me img{width:26px;height:26px;border-radius:50%}
 .hr{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+/* ---- ICT chat bot ---- */
+#bt{position:fixed;right:16px;bottom:16px;z-index:60;box-shadow:0 8px 30px #8b5cf655}
+#bp{position:fixed;right:16px;bottom:64px;z-index:60;width:min(380px,calc(100vw - 32px));height:min(520px,70vh);display:flex;flex-direction:column;background:var(--card);border:1px solid var(--bd);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px #000c}
+#bp[hidden]{display:none}
+#bp .bh{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--bd);background:var(--card2)}
+#bm{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.bmsg{max-width:88%;padding:8px 11px;border-radius:12px;font-size:13px;line-height:1.5;word-wrap:break-word}
+.bmsg.user{align-self:flex-end;background:linear-gradient(135deg,#8b5cf6,#6d28d9)}
+.bmsg.bot{align-self:flex-start;background:var(--card2);border:1px solid var(--bd)}
+#bf{display:flex;gap:8px;padding:10px;border-top:1px solid var(--bd)}
+#bf input{flex:1;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}.chip{font-size:12px;padding:4px 10px;border-radius:99px;background:transparent;color:var(--pu2)}
 </style></head><body>
 <div class="moon" aria-hidden="true"></div>
 <canvas id="fx" aria-hidden="true"></canvas>
@@ -144,6 +156,13 @@ box-shadow:0 0 60px 10px #8b5cf666,0 0 220px 70px #8b5cf62a;animation:moon 8s ea
  <div class="pics" id="pv2"></div>
  <div class="hd" style="margin:12px 0 0"><button type="button" id="dl" class="ghost l" style="display:none">Delete</button><span style="flex:1"></span><button type="submit" class="pri" id="sv">Save trade</button></div>
 </form></dialog>
+
+<button id="bt" class="pri">💬 ICT Bot</button>
+<div id="bp" hidden>
+ <div class="bh"><b>ICT Trading Bot</b><button type="button" class="ghost" id="bx">✕</button></div>
+ <div id="bm"></div>
+ <form id="bf"><input id="bi" placeholder="Ask about FVG, order blocks, killzones..." autocomplete="off" maxlength="500"><button class="pri">Send</button></form>
+</div>
 
 <!-- ===== Discord login (runs first) ===== -->
 <script>
@@ -280,6 +299,86 @@ $("#td").onclick=()=>{Y=now.getFullYear();M=now.getMonth();sel=tk;render()};
 /* ---- Discord user + logout ---- */
 $("#me").innerHTML=(USER.avatar?`<img src="https://cdn.discordapp.com/avatars/${USER.id}/${USER.avatar}.png?size=64" alt="">`:"")+esc(USER.name);
 $("#out").onclick=()=>{localStorage.removeItem("jUser");location.reload()};
+/* ---- ICT chat bot (offline FAQ, no API, no cost) ---- */
+const KB=[
+{k:["what is ict","inner circle trader","who is ict","ict mean","ict stand","huddleston","about ict","ict concepts"],
+a:"**ICT** stands for Inner Circle Trader, a trading approach taught by Michael Huddleston. It focuses on how price moves from one pool of liquidity to another, using ideas like market structure, liquidity, fair value gaps, order blocks, and time of day (killzones). It is a discretionary method, so how you read the chart matters a lot."},
+{k:["market structure shift","mss","choch","change of character","change in character","reversal signal"],
+a:"**MSS (Market Structure Shift)**, also called **CHoCH (Change of Character)**, is the first break of structure against the current trend. In an uptrend, price breaks below the last higher low. ICT teaches the best MSS comes with **displacement** (a strong, fast move that leaves FVGs) and often right after a liquidity sweep. It is an early reversal clue, not a guarantee."},
+{k:["break of structure","bos","trend continuation"],
+a:"**BOS (Break of Structure)**: price breaks beyond the previous swing high (in an uptrend) or swing low (in a downtrend), ideally with a candle body close past it. It confirms the trend is continuing. Example: in an uptrend price takes out the last swing high, so the bias stays bullish and you look to buy pullbacks into a discount PD array."},
+{k:["market structure","swing high","swing low","higher high","lower low","hh hl","trend structure"],
+a:"**Market structure** is the sequence of swing highs and lows. An uptrend makes higher highs (HH) and higher lows (HL); a downtrend makes lower highs (LH) and lower lows (LL). ICT traders mark swing points, then watch for a **BOS** (continuation) or an **MSS/CHoCH** (possible reversal). Start on a higher timeframe for direction, then drop down for entries."},
+{k:["liquidity sweep","sweep","stop hunt","raid","liquidity raid","liquidity grab","fake breakout"],
+a:"A **liquidity sweep** (also called a raid or stop hunt) is when price pokes past a high or low to trigger resting stops, then reverses. A useful sweep usually shows a wick beyond the level, a close back inside, then an MSS with displacement. If price keeps closing beyond the level, it is more likely a real breakout than a sweep."},
+{k:["draw on liquidity","dol","daily bias","bias","directional bias","which direction"],
+a:"**Daily bias** is your expected direction for the day. A common process: **1)** read higher timeframe structure (weekly/daily). **2)** find the **draw on liquidity**, like a prior day/week high or low or an unfilled HTF FVG. **3)** check whether price is in premium or discount. **4)** see how price reacted to HTF PD arrays. Then trade only in that direction during killzones. If bias is unclear, skipping the day is fine."},
+{k:["buy side liquidity","sell side liquidity","bsl","ssl","liquidity","equal highs","equal lows","liquidity pool","old high","old low"],
+a:"**Liquidity** is where lots of orders (mostly stop losses) are sitting. **Buy-side liquidity (BSL)** rests above highs (stops of shorts plus breakout buy orders). **Sell-side liquidity (SSL)** rests below lows. Common pools: equal highs/lows, previous day/week highs and lows, and session highs/lows like the Asian range. The idea is that price is drawn to these levels and often reverses after taking them."},
+{k:["inversion fvg","ifvg","bpr","balanced price range","inverse fvg","inversion"],
+a:"An **Inversion FVG (IFVG)** happens when price closes through an FVG instead of respecting it, so the gap flips role: a broken bullish FVG can become resistance, a broken bearish FVG can become support. A **BPR (Balanced Price Range)** is where a bullish and a bearish FVG overlap, and price often reacts there."},
+{k:["fair value gap","fvg","fvgs","imbalance","consequent encroachment","gap fill","bisi","sibi","inefficiency"],
+a:"A **Fair Value Gap (FVG)** is a three-candle pattern where the middle candle's strong move leaves a gap between the high of candle 1 and the low of candle 3 (bullish), or the low of candle 1 and the high of candle 3 (bearish). Price often returns to fill part of it. Many traders watch the 50% midpoint, called **consequent encroachment (CE)**. Bullish FVGs tend to act as support in uptrends and bearish FVGs as resistance in downtrends."},
+{k:["breaker block","breaker","mitigation block","mitigation"],
+a:"A **Breaker Block** is an order block that failed: price broke through it (usually after sweeping liquidity), and now it flips. A failed bullish OB becomes a **bearish breaker** that can act as resistance on a retest, and vice versa. A **Mitigation Block** is similar, but price does not take liquidity first before the structure shift. Both are retest entries after a reversal."},
+{k:["order block","orderblock","ob","obs","bullish ob","bearish ob"],
+a:"An **Order Block (OB)** is the last opposing candle before a strong displacement move. A **bullish OB** is the last down candle before price rallies and breaks structure; a **bearish OB** is the last up candle before a strong drop. Traders watch the candle body or its 50% level as an entry zone on the retrace. Stronger OBs form after a liquidity sweep, cause an MSS, and leave an FVG. The stop usually goes beyond the OB's extreme."},
+{k:["optimal trade entry","ote","62","79","70.5","fibonacci","fib retracement","fib"],
+a:"**OTE (Optimal Trade Entry)** is the retracement zone between **62% and 79%** of a swing leg, with 70.5% as the sweet spot. After an MSS, draw a Fibonacci from the swing low to high (or high to low for sells) and look for an FVG or OB inside that zone for the entry. Put the stop beyond the swing and target the opposite liquidity."},
+{k:["premium","discount","equilibrium","dealing range","premium and discount","premium discount","50%"],
+a:"ICT splits a dealing range (swing low to swing high) at its **50% equilibrium**. Above 50% is **premium** (expensive: look to sell). Below 50% is **discount** (cheap: look to buy). With a bullish bias you want to buy from discount PD arrays; with a bearish bias, sell from premium. Buying in premium while bullish is usually considered lower quality."},
+{k:["pd array","pd arrays","price delivery array"],
+a:"**PD Arrays (Premium/Discount Arrays)** are the price levels ICT uses as reaction zones: order blocks, FVGs, breakers, mitigation blocks, rejection blocks, old highs and lows, and so on. Bullish setups use discount arrays, bearish setups use premium arrays. Higher timeframe arrays carry more weight than lower timeframe ones."},
+{k:["displacement","energetic move","impulsive move","impulse"],
+a:"**Displacement** is a strong, fast, one-sided move made of large-bodied candles that usually leaves FVGs behind. It shows aggressive participation and is what makes a structure break credible. A break without displacement is more likely a fake-out."},
+{k:["silver bullet"],
+a:"The **Silver Bullet** is a time-based setup taught in one-hour windows (New York time): about 3:00-4:00 AM, 10:00-11:00 AM, and 2:00-3:00 PM. Inside the window, look for a liquidity sweep or MSS, then an FVG, enter on the retrace into it, and target the next liquidity level. It is mainly used on index futures like NQ, and only makes sense if there is enough room to the target."},
+{k:["killzone","kill zone","killzones","session","london open","new york open","ny open","trading hours","best time","what time"],
+a:"**Killzones** are the high-volume times ICT traders focus on (New York time): Asian ~8:00 PM-12:00 AM, London ~2:00-5:00 AM, New York AM ~7:00-10:00 AM, London close ~10:00 AM-12:00 PM. Exact windows differ slightly by teacher. Many traders only trade London and NY AM. Convert these to your own local timezone before using them."},
+{k:["judas swing","judas"],
+a:"A **Judas Swing** is a false move at a session open (like the New York midnight open or the London open) that sweeps liquidity one way before price reverses and runs the other way. Wait for the sweep plus an MSS instead of chasing the first move."},
+{k:["power of 3","power of three","po3","amd","accumulation manipulation distribution","accumulation"],
+a:"**Power of 3 (PO3 / AMD)** stands for Accumulation, Manipulation, Distribution. Price consolidates (accumulation, often the Asian session), makes a false move to grab liquidity (manipulation, the Judas swing), then moves in the true direction (distribution, London/NY). On a daily candle, a bullish PO3 opens, drops below the open, then rallies to close above it."},
+{k:["asian range","asia range","asian session","asia session"],
+a:"The **Asian range** is the high and low formed in the Asian session (~8 PM-12 AM ET). London often sweeps one side of it (the Judas swing) before moving the other way, so its high and low act as liquidity targets. Mark the range before London opens."},
+{k:["smt","smt divergence","smart money tool","divergence","correlated","correlation"],
+a:"**SMT Divergence (Smart Money Tool)** compares correlated markets, like NQ vs ES vs YM, or EURUSD vs GBPUSD vs DXY. If one market makes a new high/low and the other fails to, that disagreement hints at weakness at that level and a possible reversal. It works best at key liquidity levels or inside killzones as extra confirmation, not on its own."},
+{k:["midnight open","true day open","opening gap","ndog","nwog","new york midnight","opening price","8:30","830"],
+a:"The **New York midnight open (00:00 ET)** and the **8:30 AM open** are reference prices. With a bullish bias you want to buy below the open (discount); with a bearish bias, sell above it (premium). **Opening gaps (NDOG/NWOG)** are the gap between the prior close and the new open, and their 50% level often acts as support or resistance."},
+{k:["ipda","interbank price delivery","20 40 60","lookback"],
+a:"**IPDA (Interbank Price Delivery Algorithm)** is ICT's idea that price is delivered algorithmically, referencing the last 20, 40, and 60 days of highs and lows as liquidity targets. In practice, it means marking old highs/lows from those lookback windows as potential draws on liquidity. It is a theory you cannot verify, so treat it as a framework."},
+{k:["entry model","how to enter","how do i enter","how to trade","trade plan","strategy","step by step","setup","model","how to use ict","start"],
+a:"A typical ICT entry flow: **1)** set higher timeframe bias (daily/4H). **2)** wait for a killzone. **3)** look for a liquidity sweep of a high/low. **4)** wait for displacement and an MSS. **5)** enter on the retrace into an FVG/OB (ideally inside OTE, in discount for buys or premium for sells). **6)** stop beyond the swept extreme or the OB. **7)** target the next opposing liquidity, aiming for at least 2R. Practice on demo first and log each trade in your journal."},
+{k:["timeframe","time frame","which timeframe","higher timeframe","htf","ltf","1 minute","5 minute","15 minute"],
+a:"A common approach: use **weekly/daily/4H** for bias and key levels, **1H/15m** for structure and PD arrays, and **5m/1m** to time the entry. Always keep higher timeframe context above lower timeframe signals."},
+{k:["stop loss","take profit","target","where to put stop","where to place stop","sl","tp","breakeven"],
+a:"**Stops** go beyond the swing high/low that was swept, or beyond the OB/FVG extreme (the level that proves your idea wrong). **Targets** are the next liquidity pool (previous high/low, equal highs/lows, session extremes) or an opposite-side PD array. Taking partials at 1R-2R and moving to breakeven are common choices, but define your rules and test them."},
+{k:["risk","risk management","position size","lot size","risk reward","rr","drawdown","money management","daily loss"],
+a:"Risk basics: risk a small fixed % per trade (many use 0.5-1%), place stops where your idea is invalid, look for at least 1:2 reward-to-risk, set a max daily loss, and stop trading after hitting it. Never move a stop further away. If you cannot define the stop, you do not have a trade. This is education, not financial advice."},
+{k:["journal","journaling","psychology","emotion","mood","discipline","revenge","fomo","overtrading"],
+a:"Use your journal's **Setup** field for the model (e.g. 'Silver Bullet', 'OB + FVG', 'MSS retrace') and the **Mood** field to spot emotional trades like FOMO or revenge. After 20-30 trades, compare setups by win rate and profit factor, and write a daily reflection. Chart screenshots make review much easier."},
+{k:["profitable","does ict work","is ict good","legit","scam","does it work","win rate","proven"],
+a:"Honest answer: ICT concepts are discretionary and subjective, so two traders can mark the same chart differently. There is no solid public evidence that it is profitable for most traders, and most retail traders lose money in general. Treat it as a framework, backtest your own rules, use a demo account first, and keep risk small."},
+{k:["hi","hello","hey","help","topics","menu","yo","sup"],
+a:"Hey! I can explain ICT concepts. Try asking about: market structure, BOS, MSS/CHoCH, liquidity, sweeps, FVG, order blocks, breaker blocks, premium/discount, OTE, killzones, Silver Bullet, Power of 3, Judas swing, SMT divergence, daily bias, entry model, or risk management."}
+];
+const FALLBACK="I don't have an answer for that yet. Try asking about: market structure, BOS, MSS/CHoCH, liquidity, sweeps, FVG, order blocks, breaker blocks, premium/discount, OTE, killzones, Silver Bullet, Power of 3, Judas swing, SMT divergence, daily bias, entry model, or risk management.";
+const norm=s=>" "+s.toLowerCase().replace(/[^a-z0-9.%: ]+/g," ").replace(/\s+/g," ")+" ";
+function answer(q){const t=norm(q);let best=null,bs=0;
+ for(const e of KB){let s=0;for(const k of e.k){const hit=k.length<=4?t.includes(" "+k+" "):t.includes(k);if(hit)s+=k.length}
+  if(s>bs){bs=s;best=e}}
+ return best?best.a:FALLBACK}
+const fmt=t=>esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>");
+function addM(role,text){const d=document.createElement("div");d.className="bmsg "+role;d.innerHTML=fmt(text);$("#bm").appendChild(d);$("#bm").scrollTop=1e9;return d}
+function ask(q){addM("user",q);const a=answer(q);setTimeout(()=>addM("bot",a),250)}
+const CHIPS=["Market structure","Liquidity","FVG","Order blocks","Killzones","Silver Bullet","Entry model","Risk management"];
+function greet(){addM("bot","Hey! Ask me anything about ICT concepts, or tap a topic below. Education only, not financial advice.");
+ const c=document.createElement("div");c.className="chips";
+ CHIPS.forEach(x=>{const b=document.createElement("button");b.type="button";b.className="chip";b.textContent=x;b.onclick=()=>ask(x);c.appendChild(b)});
+ $("#bm").appendChild(c)}
+$("#bt").onclick=()=>{const p=$("#bp");p.hidden=!p.hidden;if(!p.hidden){if(!$("#bm").children.length)greet();$("#bi").focus()}};
+$("#bx").onclick=()=>{$("#bp").hidden=true};
+$("#bf").onsubmit=e=>{e.preventDefault();const q=$("#bi").value.trim();if(!q)return;$("#bi").value="";ask(q)};
 addEventListener("resize",eq);sel=tk;render();
 </script>
 </body></html>
