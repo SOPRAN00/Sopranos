@@ -1,0 +1,22 @@
+{
+  "name": "trade-journal",
+  "version": "1.0.0",
+  "description": "USTEC.f trading journal with P&L calendar",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.example.tradejournal",
+    "productName": "Trade Journal",
+    "files": ["main.js", "index.html", "package.json"],
+    "win": { "target": "nsis" },
+    "mac": { "target": "dmg", "category": "public.app-category.finance" },
+    "linux": { "target": "AppImage", "category": "Office" }
+  }
+}
