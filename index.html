@@ -164,45 +164,56 @@ box-shadow:0 0 60px 10px #8b5cf666,0 0 220px 70px #8b5cf62a;animation:moon 8s ea
  <form id="bf"><input id="bi" placeholder="Ask about FVG, order blocks, killzones..." autocomplete="off" maxlength="500"><button class="pri">Send</button></form>
 </div>
 
-<!-- ===== Discord login (runs first) ===== -->
+<!-- Supabase client: replace the two placeholders below with your Project URL and Publishable key -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const DISCORD_CLIENT_ID="1565095062499627188";
-const REDIRECT="https://sopran00.github.io/Sopranos/";
-let USER=null;
-try{USER=JSON.parse(localStorage.getItem("jUser")||"null")}catch(e){}
-if(USER&&USER.exp<Date.now())USER=null;
+const SUPABASE_URL = "https://pdaofqlvekfykfzyqvmm.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_YNcwzoRGVJKoMqGS_zMZqA_bW8FZ1HE";
+const SITE_URL = "https://sopran00.github.io/Sopranos/";
 
-function loginUrl(){
-  const s=crypto.randomUUID();sessionStorage.setItem("oauthState",s);
-  return "https://discord.com/oauth2/authorize?"+new URLSearchParams({
-    client_id:DISCORD_CLIENT_ID,response_type:"token",redirect_uri:REDIRECT,scope:"identify",state:s});
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+});
+
+function showLogin(msg) {
+  const old = document.getElementById("auth");
+  if (old) old.remove();
+  document.body.insertAdjacentHTML("beforeend", `<div id="auth"><div class="box"><h2>Sopranos Journal</h2>
+    <p class="mu" id="authmsg">${msg || "Sign in with Discord to continue."}</p>
+    <button id="loginbtn">Continue with Discord</button></div></div>`);
+  document.getElementById("loginbtn").onclick = async () => {
+    const button = document.getElementById("loginbtn");
+    button.disabled = true;
+    document.getElementById("authmsg").textContent = "Opening Discord…";
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: "discord",
+      options: { redirectTo: SITE_URL }
+    });
+    if (error) {
+      document.getElementById("authmsg").textContent = "Login failed: " + error.message;
+      button.disabled = false;
+    }
+  };
 }
-function showLogin(msg){
-  const old=document.getElementById("auth");if(old)old.remove();
-  document.body.insertAdjacentHTML("beforeend",
-   `<div id="auth"><div class="box"><h2>Sopranos Journal</h2>
-    <p class="mu">${msg||"Sign in with Discord to continue."}</p>
-    <button onclick="location.href=loginUrl()">Continue with Discord</button></div></div>`);
-}
-(async()=>{
-  const h=new URLSearchParams(location.hash.slice(1));
-  if(h.get("access_token")){
-    const ok=h.get("state")===sessionStorage.getItem("oauthState");
-    history.replaceState(null,"",location.pathname);
-    if(!ok)return showLogin("Login failed (bad state). Try again.");
-    try{
-      const r=await fetch("https://discord.com/api/users/@me",{headers:{Authorization:"Bearer "+h.get("access_token")}});
-      const u=await r.json();
-      if(!u.id)throw 0;
-      localStorage.setItem("jUser",JSON.stringify({id:u.id,name:u.global_name||u.username,avatar:u.avatar,exp:Date.now()+(+h.get("expires_in")||604800)*1000}));
-      location.reload();
-    }catch(e){showLogin("Couldn't reach Discord. Try again.")}
-  }else if(!USER)showLogin();
+
+window.authReady = (async () => {
+  if (SUPABASE_URL === "YOUR_SUPABASE_PROJECT_URL" || SUPABASE_ANON_KEY === "YOUR_SUPABASE_PUBLISHABLE_KEY") {
+    showLogin("First add your Supabase Project URL and Publishable key in index.html.");
+    return null;
+  }
+  const { data, error } = await sb.auth.getSession();
+  if (error) {
+    showLogin("Could not check your login: " + error.message);
+    return null;
+  }
+  if (!data.session) showLogin();
+  return data.session ? data.session.user : null;
 })();
 </script>
 
 <script>
-if(!USER)throw new Error("login required");
+window.authReady.then(async USER => {
+if(!USER) return;
 const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,"0");
 /* house = refresh */
 $("#house").onclick=()=>location.reload();
@@ -228,12 +239,64 @@ if(!matchMedia("(prefers-reduced-motion: reduce)").matches)flames();
 /* ---- journal ---- */
 let T=[],N={},now=new Date(),Y=now.getFullYear(),M=now.getMonth(),sel=null,eid=null,manual=false,pics=[];
 const KT="jT:"+USER.id,KN="jN:"+USER.id;
-try{
-  // one-time migration of existing local data to the first account that logs in
-  if(!localStorage.getItem(KT)&&localStorage.getItem("jT")){localStorage.setItem(KT,localStorage.getItem("jT"));localStorage.setItem(KN,localStorage.getItem("jN")||"{}");localStorage.removeItem("jT");localStorage.removeItem("jN")}
-  T=JSON.parse(localStorage.getItem(KT)||"[]");N=JSON.parse(localStorage.getItem(KN)||"{}")
-}catch(e){}
-const save=()=>{try{localStorage.setItem(KT,JSON.stringify(T));localStorage.setItem(KN,JSON.stringify(N))}catch(e){alert("Storage is full. Remove some pictures to save more.")}};
+let syncTimer=null,syncErrorShown=false;
+function cacheLocal(){
+  try { localStorage.setItem(KT,JSON.stringify(T)); localStorage.setItem(KN,JSON.stringify(N)); }
+  catch(e) { alert("This browser's storage is full. Remove some chart pictures to save more."); }
+}
+async function syncJournalData(){
+  const { error } = await sb.from("journal_data").upsert({
+    user_id: USER.id, trades: T, reflections: N,
+    migration_completed: true, updated_at: new Date().toISOString()
+  }, { onConflict: "user_id" });
+  if (error) {
+    console.error("Journal cloud sync failed:", error);
+    if (!syncErrorShown) {
+      syncErrorShown=true;
+      alert("Your changes are saved on this device, but cloud sync failed. Check that the journal_data table and its RLS policies were created correctly. Details: " + error.message);
+    }
+    return false;
+  }
+  syncErrorShown=false;
+  return true;
+}
+const save=()=>{
+  cacheLocal();
+  clearTimeout(syncTimer);
+  syncTimer=setTimeout(()=>{ syncJournalData(); },700);
+};
+async function loadJournalData(){
+  const { data, error } = await sb.from("journal_data")
+    .select("trades,reflections,migration_completed")
+    .eq("user_id",USER.id).maybeSingle();
+  if (error) throw error;
+  if (data) {
+    T=Array.isArray(data.trades)?data.trades:[];
+    N=data.reflections && typeof data.reflections==="object" ? data.reflections : {};
+    cacheLocal();
+    return;
+  }
+  // First sign-in: migrate the existing Discord-keyed browser data to this Supabase account.
+  let oldDiscordId=null;
+  try { const oldUser=JSON.parse(localStorage.getItem("jUser")||"null"); if(oldUser&&oldUser.id) oldDiscordId=oldUser.id; } catch(e) {}
+  const oldTrades=oldDiscordId ? localStorage.getItem("jT:"+oldDiscordId) : null;
+  const oldNotes=oldDiscordId ? localStorage.getItem("jN:"+oldDiscordId) : null;
+  const cachedTrades=localStorage.getItem(KT);
+  const cachedNotes=localStorage.getItem(KN);
+  const legacyTrades=oldTrades || localStorage.getItem("jT") || cachedTrades || "[]";
+  const legacyNotes=oldNotes || localStorage.getItem("jN") || cachedNotes || "{}";
+  try { T=JSON.parse(legacyTrades); if(!Array.isArray(T)) T=[]; } catch(e) { T=[]; }
+  try { N=JSON.parse(legacyNotes); if(!N || typeof N!=="object" || Array.isArray(N)) N={}; } catch(e) { N={}; }
+  cacheLocal();
+  const ok=await syncJournalData();
+  if(ok){ localStorage.removeItem("jT"); localStorage.removeItem("jN"); }
+}
+try { await loadJournalData(); }
+catch(e) {
+  console.error("Could not load journal from Supabase:",e);
+  showLogin("Could not load your journal data. Refresh and check your Supabase URL, key, table, and RLS policies. " + (e.message||""));
+  return;
+}
 const key=(y,m,d)=>`${y}-${pad(m+1)}-${pad(d)}`,tk=key(now.getFullYear(),now.getMonth(),now.getDate());
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const money=(v,d=0)=>(v<0?"-":v>0?"+":"")+"$"+Math.abs(v).toLocaleString("en-US",{maximumFractionDigits:d});
@@ -296,9 +359,12 @@ $("#dl").onclick=()=>{T=T.filter(o=>o.id!=eid);save();$("#dlg").close();render()
 $("#cal").onclick=e=>{const d=e.target.closest("[data-d]");if(d){sel=d.dataset.d;render()}};
 const go=n=>{M+=n;if(M<0){M=11;Y--}if(M>11){M=0;Y++}render()};$("#pv").onclick=()=>go(-1);$("#nx").onclick=()=>go(1);
 $("#td").onclick=()=>{Y=now.getFullYear();M=now.getMonth();sel=tk;render()};
-/* ---- Discord user + logout ---- */
-$("#me").innerHTML=(USER.avatar?`<img src="https://cdn.discordapp.com/avatars/${USER.id}/${USER.avatar}.png?size=64" alt="">`:"")+esc(USER.name);
-$("#out").onclick=()=>{localStorage.removeItem("jUser");location.reload()};
+/* ---- Supabase user + logout ---- */
+const meta=USER.user_metadata||{};
+const avatar=meta.avatar_url||meta.picture||"";
+const displayName=meta.full_name||meta.name||meta.user_name||meta.preferred_username||"Discord user";
+$("#me").innerHTML=(avatar?`<img src="${esc(avatar)}" alt="">`:"")+esc(displayName);
+$("#out").onclick=async()=>{const {error}=await sb.auth.signOut();if(error){alert("Logout failed: "+error.message);return;}location.reload()};
 /* ---- ICT chat bot (offline FAQ, no API, no cost) ---- */
 const KB=[
 {k:["what is ict","inner circle trader","who is ict","ict mean","ict stand","huddleston","about ict","ict concepts"],
@@ -380,5 +446,6 @@ $("#bt").onclick=()=>{const p=$("#bp");p.hidden=!p.hidden;if(!p.hidden){if(!$("#
 $("#bx").onclick=()=>{$("#bp").hidden=true};
 $("#bf").onsubmit=e=>{e.preventDefault();const q=$("#bi").value.trim();if(!q)return;$("#bi").value="";ask(q)};
 addEventListener("resize",eq);sel=tk;render();
+});
 </script>
 </body></html>
