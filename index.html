@@ -90,6 +90,9 @@ box-shadow:0 0 60px 10px #8b5cf666,0 0 220px 70px #8b5cf62a;animation:moon 8s ea
 #auth{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:20px;background:rgba(7,5,12,.25);animation:in .5s ease both}
 #auth .box{width:min(380px,100%);text-align:center;padding:34px 28px 26px;border-radius:22px;border:1px solid var(--bd);background:linear-gradient(180deg,rgba(22,16,36,.82),rgba(16,12,26,.9));backdrop-filter:blur(10px);box-shadow:0 30px 80px #000a,0 0 60px #8b5cf622}
 body:has(#auth) header,body:has(#auth) main,body:has(#auth) .house,body:has(#auth) #bt,body:has(#auth) #bp{display:none}
+#auth .join,.joinh{display:block;text-decoration:none;color:var(--pu2);border:1px solid var(--bd);border-radius:12px;padding:10px 20px;margin-top:10px;font-weight:600;font-size:13px;transition:.18s}
+#auth .join:hover,.joinh:hover{border-color:var(--pu);box-shadow:0 0 0 3px #8b5cf622}
+.joinh{display:inline-block;margin:0;padding:8px 12px;font-weight:500}
 #auth .lg{width:56px;height:56px;margin:0 auto 14px;border-radius:16px;background:linear-gradient(135deg,var(--pu),#4c1d95);box-shadow:0 0 30px #8b5cf688;display:grid;place-items:center;font-size:26px}
 #auth h2{margin:0;font-size:26px;letter-spacing:.3px}
 #auth .tag2{color:var(--pu2);font-size:13px;margin:4px 0 18px}
@@ -134,6 +137,7 @@ body:has(#auth) header,body:has(#auth) main,body:has(#auth) .house,body:has(#aut
 <header><div class="logo"><i>◆</i><div>Sopranos Journal<small>USD</small></div></div>
 <div class="hr">
   <div class="me" id="me"></div>
+  <a class="joinh" href="https://discord.gg/rh5rtxRFYc" target="_blank" rel="noopener">Discord</a>
   <button class="ghost" id="out">Logout</button>
   <button class="pri" id="add">+ New trade</button>
 </div></header>
@@ -197,6 +201,7 @@ function showLogin(msg) {
     </ul>
     <p class="mu" id="authmsg" style="margin:0 0 4px;font-size:13px">${msg || "Sign in to open your journal."}</p>
     <button id="loginbtn">Continue with Discord</button>
+    <a class="join" href="https://discord.gg/rh5rtxRFYc" target="_blank" rel="noopener">Join our Discord server</a>
     <p class="fine">Your journal is private to your account.</p>
   </div></div>`);
   document.getElementById("loginbtn").onclick = async () => {
