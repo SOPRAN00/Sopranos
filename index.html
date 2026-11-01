@@ -6,8 +6,8 @@
 :root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 --bg:#07050c;--card:#100c1a;--card2:#161024;--bd:#2a1f45;--tx:#ece8f7;--mu:#8d82aa;--pu:#8b5cf6;--pu2:#c084fc;--win:#34d399;--loss:#f43f5e}
 *{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:radial-gradient(900px 500px at 85% -10%,#2a1058 0,transparent 60%),radial-gradient(700px 400px at -10% 110%,#1d0b3d 0,transparent 60%),var(--bg);background-attachment:fixed;color:var(--tx);font:14px/1.45 Inter,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
-#fx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+body{margin:0;background:radial-gradient(900px 500px at 85% -10%,#2a1058 0,transparent 60%),radial-gradient(700px 400px at -10% 110%,#1d0b3d 0,transparent 60%),var(--bg);color:var(--tx);font:14px/1.45 Inter,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+#fx{will-change:transform;position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
 header,main{position:relative;z-index:1}
 header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:16px 20px;max-width:1150px;margin:0 auto}
 .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:.2px}
@@ -19,10 +19,10 @@ button{cursor:pointer}button:hover{border-color:var(--pu);box-shadow:0 0 0 3px #
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pu);box-shadow:0 0 0 3px #8b5cf633}
 .pri{background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-color:transparent;font-weight:600}
 .ghost{background:transparent}
-.card{background:linear-gradient(180deg,rgba(22,16,36,.9),rgba(16,12,26,.92));border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:16px;animation:in .45s ease both;backdrop-filter:blur(6px)}
+.card{background:linear-gradient(180deg,rgba(22,16,36,.95),rgba(16,12,26,.97));border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:16px;animation:in .45s ease both}
 @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:12px;margin-bottom:16px}
-.stat{background:linear-gradient(180deg,rgba(22,16,36,.9),rgba(16,12,26,.92));border:1px solid var(--bd);border-radius:14px;padding:12px 14px;animation:in .45s ease both;backdrop-filter:blur(6px)}
+.stat{background:linear-gradient(180deg,rgba(22,16,36,.9),rgba(16,12,26,.92));border:1px solid var(--bd);border-radius:14px;padding:12px 14px}
 .stat span{color:var(--mu);font-size:12px}.stat b{display:block;font-size:21px;margin-top:2px;font-variant-numeric:tabular-nums}
 .w{color:var(--win)}.l{color:var(--loss)}.mu{color:var(--mu)}
 .top{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
@@ -49,7 +49,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pu);box-
 textarea{width:100%;min-height:72px;resize:vertical}
 canvas{width:100%;display:block}
 dialog{border:1px solid var(--bd);border-radius:18px;background:var(--card);color:var(--tx);padding:20px;width:min(560px,94vw);max-height:92vh;box-shadow:0 30px 80px #000c}
-dialog::backdrop{background:#000a;backdrop-filter:blur(4px)}
+dialog::backdrop{background:#000c}
 .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
 .g label{display:flex;flex-direction:column;gap:4px;color:var(--mu);font-size:12px}
 .g input,.g select{width:100%}
@@ -62,7 +62,7 @@ dialog::backdrop{background:#000a;backdrop-filter:blur(4px)}
 .th img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
 .th button{position:absolute;top:2px;right:2px;padding:0 6px;line-height:18px;font-size:12px;border-radius:99px;background:#000b}
 .th.big{width:96px;height:96px}
-.lb{position:fixed;inset:0;z-index:100;background:#000d;display:grid;place-items:center;cursor:zoom-out;backdrop-filter:blur(4px)}
+.lb{position:fixed;inset:0;z-index:100;background:#000e;display:grid;place-items:center;cursor:zoom-out}
 .lb img{max-width:94vw;max-height:90vh;border-radius:12px;box-shadow:0 20px 60px #000}
 @media(max-width:700px){main,header{padding-left:10px;padding-right:10px}.day{min-height:62px;padding:5px}.p{font-size:11px}.c{display:none}.cal{gap:4px;grid-template-columns:repeat(7,minmax(0,1fr)) minmax(54px,.9fr)}.wk .n{font-size:8px}}
 .moon{position:fixed;top:5%;right:6%;width:min(38vw,400px);aspect-ratio:1;border-radius:50%;z-index:0;pointer-events:none;opacity:.55;
@@ -72,14 +72,13 @@ radial-gradient(circle at 62% 28%,rgba(120,100,170,.3) 0 10%,transparent 11%),
 radial-gradient(circle at 55% 66%,rgba(120,100,170,.35) 0 12%,transparent 13%),
 radial-gradient(circle at 25% 70%,rgba(120,100,170,.25) 0 6%,transparent 7%),
 radial-gradient(circle at 35% 30%,#f6f1ff 0,#d3c4f5 40%,#9a86cf 75%,#6a54a8 100%);
-box-shadow:0 0 60px 10px #8b5cf666,0 0 220px 70px #8b5cf62a;animation:moon 8s ease-in-out infinite alternate}
+box-shadow:0 0 60px 10px #8b5cf666,0 0 220px 70px #8b5cf62a}
 @keyframes moon{from{box-shadow:0 0 60px 10px #8b5cf655,0 0 200px 60px #8b5cf622}to{box-shadow:0 0 80px 16px #8b5cf688,0 0 260px 90px #8b5cf633}}
 @media(max-width:700px){.moon{width:62vw;top:3%;right:-12%;opacity:.4}}
-@media(prefers-reduced-motion:reduce){.moon{animation:none}}
 /* ---- little dark house with smoke (click = refresh) ---- */
 .house{position:fixed;top:0;left:6px;width:112px;z-index:2;cursor:pointer;overflow:visible;transition:.2s;-webkit-tap-highlight-color:transparent}
 .house:hover{filter:drop-shadow(0 0 10px #8b5cf6aa);transform:translateY(2px)}
-.house .sm{fill:#b9a9e6;opacity:0;transform-box:fill-box;transform-origin:center;animation:smoke 6s linear infinite;pointer-events:none}
+.house .sm{fill:#b9a9e6;opacity:0;will-change:transform,opacity;transform-box:fill-box;transform-origin:center;animation:smoke 6s linear infinite;pointer-events:none}
 @keyframes smoke{0%{opacity:0;transform:translate(0,0) scale(.5)}12%{opacity:.5}100%{opacity:0;transform:translate(26px,-86px) scale(3.4)}}
 .house .win{animation:flick 3.2s ease-in-out infinite alternate}
 @keyframes flick{from{opacity:.65}to{opacity:1}}
@@ -170,7 +169,6 @@ html{-webkit-text-size-adjust:100%}
 <header><div class="logo"><i>◆</i><div>Sopranos Journal<small>USD</small></div></div>
 <div class="hr">
   <div class="me" id="me"></div>
-  <a class="joinh" href="https://discord.gg/rh5rtxRFYc" target="_blank" rel="noopener">Join Discord</a>
   <button class="ghost" id="out">Logout</button>
   <button class="pri" id="add">+ New trade</button>
 </div></header>
@@ -275,28 +273,30 @@ const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,"0");
 /* house = refresh */
 $("#house").onclick=()=>location.reload();
 /* ---- moving flames (purple, matches theme) ---- */
-const fc=$("#fx"),fg=fc.getContext("2d");let FW=0,FH=0,P=[];
-function fr(){const d=devicePixelRatio||1;FW=innerWidth;FH=innerHeight;fc.width=FW*d;fc.height=FH*d;fg.setTransform(d,0,0,d,0,0)}
-fr();addEventListener("resize",fr);
-function flames(){
+const fc=$("#fx"),fg=fc.getContext("2d");let FW=0,FH=0,P=[],lastT=0;
+function fr(){FW=innerWidth;FH=innerHeight;fc.width=FW>>1;fc.height=FH>>1;fg.setTransform(.5,0,0,.5,0,0)}
+fr();let rzT;addEventListener("resize",()=>{clearTimeout(rzT);rzT=setTimeout(fr,200)});
+function flames(t){
+ requestAnimationFrame(flames);
+ if(document.hidden||t-lastT<33)return;lastT=t;
  fg.clearRect(0,0,FW,FH);fg.globalCompositeOperation="lighter";
  const base=fg.createLinearGradient(0,FH-140,0,FH);base.addColorStop(0,"rgba(139,92,246,0)");base.addColorStop(1,"rgba(139,92,246,.14)");
  fg.fillStyle=base;fg.fillRect(0,FH-140,FW,140);
- const want=Math.min(260,Math.max(80,FW/5));
- for(let i=0;i<4&&P.length<want;i++)P.push({x:Math.random()*FW,y:FH+20,r:28+Math.random()*48,vy:1+Math.random()*2.2,l:0,m:110+Math.random()*120,ph:Math.random()*6.28,sp:.02+Math.random()*.03});
+ const want=Math.min(60,Math.max(22,FW/20));
+ for(let i=0;i<2&&P.length<want;i++)P.push({x:Math.random()*FW,y:FH+20,r:28+Math.random()*48,vy:2+Math.random()*3.4,l:0,m:55+Math.random()*60,ph:Math.random()*6.28,sp:.04+Math.random()*.06});
  P=P.filter(p=>p.l<p.m);
  for(const p of P){
-  p.l++;const t=p.l/p.m;p.y-=p.vy;p.x+=Math.sin(p.l*p.sp+p.ph)*1.1;
-  const r=p.r*(1-t*.75),a=(1-t)*.1*(t<.1?t*10:1),h=290-t*35,li=68-t*36;
+  p.l++;const k=p.l/p.m;p.y-=p.vy;p.x+=Math.sin(p.l*p.sp+p.ph)*2;
+  const r=p.r*(1-k*.75),a=(1-k)*.12*(k<.1?k*10:1),h=290-k*35,li=68-k*36;
   const g=fg.createRadialGradient(p.x,p.y,0,p.x,p.y,r);
   g.addColorStop(0,`hsla(${h},90%,${li}%,${a})`);g.addColorStop(1,`hsla(${h},90%,${li}%,0)`);
   fg.fillStyle=g;fg.beginPath();fg.arc(p.x,p.y,r,0,6.283);fg.fill()}
- fg.globalCompositeOperation="source-over";requestAnimationFrame(flames)}
-if(!matchMedia("(prefers-reduced-motion: reduce)").matches)flames();
+ fg.globalCompositeOperation="source-over"}
+if(!matchMedia("(prefers-reduced-motion: reduce)").matches)requestAnimationFrame(flames);
 /* ---- journal ---- */
 let T=[],N={},now=new Date(),Y=now.getFullYear(),M=now.getMonth(),sel=null,eid=null,manual=false,pics=[];
 const KT="jT:"+USER.id,KN="jN:"+USER.id;
-let syncTimer=null,syncErrorShown=false;
+let syncTimer=null,cacheTimer=null,syncErrorShown=false;
 function cacheLocal(){
   try { localStorage.setItem(KT,JSON.stringify(T)); localStorage.setItem(KN,JSON.stringify(N)); }
   catch(e) { alert("This browser's storage is full. Remove some chart pictures to save more."); }
@@ -318,10 +318,11 @@ async function syncJournalData(){
   return true;
 }
 const save=()=>{
-  cacheLocal();
+  clearTimeout(cacheTimer);cacheTimer=setTimeout(cacheLocal,400);
   clearTimeout(syncTimer);
   syncTimer=setTimeout(()=>{ syncJournalData(); },700);
 };
+addEventListener("visibilitychange",()=>{if(document.hidden){clearTimeout(cacheTimer);cacheLocal()}});
 async function loadJournalData(){
   const { data, error } = await sb.from("journal_data")
     .select("trades,reflections,migration_completed")
@@ -502,7 +503,7 @@ function greet(){addM("bot","Hey! Ask me anything about ICT concepts, or tap a t
 $("#bt").onclick=()=>{const p=$("#bp");p.hidden=!p.hidden;if(!p.hidden){if(!$("#bm").children.length)greet();$("#bi").focus()}};
 $("#bx").onclick=()=>{$("#bp").hidden=true};
 $("#bf").onsubmit=e=>{e.preventDefault();const q=$("#bi").value.trim();if(!q)return;$("#bi").value="";ask(q)};
-addEventListener("resize",eq);sel=tk;render();
+let eqT;addEventListener("resize",()=>{clearTimeout(eqT);eqT=setTimeout(eq,150)});sel=tk;render();
 });
 </script>
 </body></html>
