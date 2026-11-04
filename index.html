@@ -277,6 +277,59 @@ window.authReady = (async () => {
 <script>
 window.authReady.then(async USER => {
 if(!USER) return;
+
+/* ---- background music: initialize only for signed-in users ---- */
+{
+  const audio = document.getElementById("bgm");
+  const button = document.getElementById("mu");
+  audio.pause();
+  audio.currentTime = 0;
+  audio.volume = 0.3;
+
+  const getMusicChoice = () => {
+    try { return localStorage.getItem("music"); } catch (e) { return null; }
+  };
+  const setMusicChoice = value => {
+    try { localStorage.setItem("music", value); } catch (e) {}
+  };
+  const updateMusicButton = () => {
+    button.textContent = audio.paused ? "🔇 Music off" : "🔊 Music on";
+  };
+
+  audio.addEventListener("play", updateMusicButton);
+  audio.addEventListener("pause", updateMusicButton);
+
+  button.addEventListener("click", async () => {
+    if (audio.paused) {
+      try {
+        await audio.play();
+        setMusicChoice("on");
+      } catch (e) {
+        setMusicChoice("off");
+        updateMusicButton();
+      }
+    } else {
+      audio.pause();
+      setMusicChoice("off");
+    }
+  });
+
+  // Resume only after sign-in, and only after the user's first interaction.
+  if (getMusicChoice() === "on") {
+    const resumeMusic = async event => {
+      if (event.target.closest("#mu")) return;
+      try {
+        await audio.play();
+      } catch (e) {
+        // The browser may still block playback; the Music button remains available.
+      }
+      removeEventListener("pointerdown", resumeMusic);
+    };
+    addEventListener("pointerdown", resumeMusic, { once: true });
+  }
+
+  updateMusicButton();
+}
 const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,"0");
 /* house = refresh */
 $("#house").onclick=()=>location.reload();
@@ -515,30 +568,4 @@ let eqT;addEventListener("resize",()=>{clearTimeout(eqT);eqT=setTimeout(eq,150)}
 });
 </script>
 
-<script>
-/* ---- background music: play/pause button, remembers choice ---- */
-(function(){
-  const a=document.getElementById("bgm"), b=document.getElementById("mu");
-  a.volume=0.3;
-  const get=()=>{try{return localStorage.getItem("music")}catch(e){return null}};
-  const set=v=>{try{localStorage.setItem("music",v)}catch(e){}};
-  const ui=()=>{b.textContent=a.paused?"🔇 Music off":"🔊 Music on"};
-  a.addEventListener("play",ui); a.addEventListener("pause",ui);
-
-  b.addEventListener("click",()=>{
-    if(a.paused){a.play().catch(()=>{});set("on")}
-    else{a.pause();set("off")}
-  });
-
-  // If they had music on last visit, resume on their first tap/click anywhere
-  if(get()==="on"){
-    const resume=e=>{
-      if(e.target.closest("#mu"))return;
-      a.play().catch(()=>{});
-      removeEventListener("pointerdown",resume);
-    };
-    addEventListener("pointerdown",resume);
-  }
-})();
-</script>
 </body></html>
